@@ -2,7 +2,7 @@ const request = require('supertest');
 const app = require('../service');
 
 //const testUser = { name: 'pizza franchisee!', email: 'reg@test.com', password: 'a' };
-const testFranchise = { name: 'pizzaMama', admins: [{ email: 'reg@test.com'}]}
+//const testFranchise = { name: 'pizzaMama', admins: [{ email: 'reg@test.com'}]}
 //let testUserAuthToken;
 
 const { Role, DB } = require('../database/database.js');
@@ -39,9 +39,17 @@ test('create a new franchise', async () => {
     const adminAuthToken = loginRes.body.token;
 
     expect(loginRes.status).toBe(200);
-    expectValidJwt(adminAuthToken).toBeDefined();
+    expect(adminAuthToken).toBeDefined();
 
-    const testFranchise = { name: 'pizzaMama', admins: [{ email: 'reg@test.com'}]}
+    franchiseName = randomName();
+    const testFranchise = { name: 'pizza' + franchiseName, admins: [{ email: adminUser.email }] };
+
+    const createFranchiseRes = await request(app).post('/api/franchise').set('Authorization', `Bearer ${adminAuthToken}`).send(testFranchise);
+
+    //console.log('Create Franchise Response:', createFranchiseRes.body);
+
+    expect(createFranchiseRes.status).toBe(200);
+    expect(createFranchiseRes.body).toMatchObject(testFranchise);
 
     //const createFranchiseRes = await request(app).post('/api/franchise').set('Authorization', `Bearer ${testUserAuthToken}`).send(testFranchise);
     //console.log('create Franchise Response:', createFranchiseRes.body);
@@ -56,6 +64,6 @@ test('create a new franchise', async () => {
 
     // response: { name: 'pizzaPocket', admins: [{ email: 'f@jwt.com', id: 4, name: 'pizza franchisee' }], id: 1 },
 
-function expectValidJwt(potentialJwt) {
-    expect(potentialJwt).toMatch(/^[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*$/);
+function randomName() {
+    return Math.random().toString(36).substring(2, 8);
 }
