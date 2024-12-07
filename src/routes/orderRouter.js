@@ -10,7 +10,7 @@ orderRouter.endpoints = [
   {
     method: 'GET',
     path: '/api/order/menu',
-    description: 'Get the pizza menu',
+    description: 'Get the pizza menu', 
     example: `curl localhost:3000/api/order/menu`,
     response: [{ id: 1, title: 'Veggie', image: 'pizza1.png', price: 0.0038, description: 'A garden of delight' }],
   },

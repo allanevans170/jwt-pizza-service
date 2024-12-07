@@ -1,15 +1,12 @@
-// test('hello world', () => {
-//     expect('hello' + ' ' + 'world').toBe('hello world');
-// });
-
 const request = require('supertest');
 const app = require('../service');
 
 const testUser = { name: 'pizza diner', email: 'reg@test.com', password: 'a' };
+
 let testUserAuthToken;
 
-beforeAll(async () => {     // registers a random user every time the tests run
-    testUser.email = Math.random().toString(36).substring(2,12) + '@test.com';
+beforeEach(async () => {     // registers a random user before the tests run
+    testUser.email = Math.random().toString(36).substring(2, 12) + '@test.com';
     const registerRes = await request(app).post('/api/auth').send(testUser);
     testUserAuthToken = registerRes.body.token;
     expectValidJwt(testUserAuthToken);
@@ -19,22 +16,35 @@ test('login', async () => {
     const loginRes = await request(app).put('/api/auth').send(testUser);
     expect(loginRes.status).toBe(200);
     expectValidJwt(loginRes.body.token);
-
+  
     const expectedUser = { ...testUser, roles: [{ role: 'diner' }] };
     delete expectedUser.password;
     expect(loginRes.body.user).toMatchObject(expectedUser);
 });
 
-//test('login with bad password', async () => {   // problem, returns 404 instead of 401...
-//    const loginRes = await request(app).put('/api/auth').send({ ...testUser, password: 'b' });
-//    expect(loginRes.status).toBe(401);
-//
+test('incomplete register', async () => {
+    const badTestUser = { name: 'no completado', password: 'z' };
+    const incompleteRegisterRes = await request(app).post('/api/auth').send(badTestUser);
+    expect(incompleteRegisterRes.status).toBe(400);
+    expect(incompleteRegisterRes.body).toEqual({ message: 'name, email, and password are required' });
+});
 
 test('logout', async () => {
     const logoutRes = await request(app).delete('/api/auth').set('Authorization', `Bearer ${testUserAuthToken}`);
     expect(logoutRes.status).toBe(200);
     expect(logoutRes.body).toEqual({ message: 'logout successful' });
+    // const noMoreAuthRes = await request(app).get('/api/franchise').set('Authorization', `Bearer ${testUserAuthToken}`);
 })
+
+// test('update user', async () => {
+//     const updatedUser = { name: 'pizza diner', email: 'new@test.com', password: 'new' };
+//     const updateUserRes = await request(app).put(`/api/auth/${testUser.id}`).set('Authorization', `Bearer ${testUserAuthToken}`).send({ email: updatedUser.email, password: updatedUser.password });
+//     console.log(updateUserRes.body);
+//     console.log(`Requesting user: ${updated}, Target userID: ${userId}`);
+//     expect(updateUserRes.status).toBe(200);
+//     expect(updateUserRes.body).toMatchObject({ email: updatedUser.email });
+
+// });
 
 function expectValidJwt(potentialJwt) {
     expect(potentialJwt).toMatch(/^[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*$/);
@@ -43,3 +53,10 @@ function expectValidJwt(potentialJwt) {
 
 // downside of pure unit test: doesn't actually test the integration of the components
 
+//test('login with bad password', async () => {   // problem, returns 404 instead of 401...
+//    const loginRes = await request(app).put('/api/auth').send({ ...testUser, password: 'b' });
+//    expect(loginRes.status).toBe(401);
+//
+
+// test('update user unauthorized', async () => {
+//    });
