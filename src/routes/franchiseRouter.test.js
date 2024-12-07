@@ -98,7 +98,7 @@ test('get franchises', async () => {
     const getFranchiseRes = await request(app).get('/api/franchise').set('Authorization', `Bearer ${adminAuthToken}`);
     expect(getFranchiseRes.status).toBe(200);
     expect(Array.isArray(getFranchiseRes.body)).toBe(true);
-    console.log(getFranchiseRes.body);
+    //console.log(getFranchiseRes.body);
 });
 
 function randomName() {

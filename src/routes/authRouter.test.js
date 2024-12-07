@@ -57,7 +57,7 @@ test('unauthorized update user fail', async () => {
 
 test('failed login', async () => {
     const badLoginRes = await request(app).put('/api/auth').send({ ...testUser, password: 'b' });
-    console.log(badLoginRes.body);
+    //console.log(badLoginRes.body);
     expect(badLoginRes.status).toBe(404);
     expect(badLoginRes.body).toMatchObject({ message: 'unknown user' });
 })
