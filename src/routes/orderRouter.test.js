@@ -15,8 +15,19 @@ async function createAdminUser() {
     return { ...user, password: 'toomanysecrets' };
 }
 
-let testUserAuthToken;
+let adminAuthToken;
+beforeAll(async () => {
+    const adminUser = await createAdminUser();
+    const loginRes = await request(app).put('/api/auth').send({ email: adminUser.email, password: adminUser.password });
+    expect(loginRes.status).toBe(200);
+    adminAuthToken = loginRes.body.token;
 
+    const addMenuItem = { id: 1, title: 'Veggie', image: 'pizza1.png', price: 0.0038, description: 'A garden of delight'};
+    const addMenuItemRes = await request(app).put('/api/order/menu').set('Authorization', `Bearer ${adminAuthToken}`).send(addMenuItem);
+    expect(addMenuItemRes.status).toBe(200);
+});
+
+let testUserAuthToken;
 beforeEach(async () => {     // registers a random user before the tests run
     testUser.email = Math.random().toString(36).substring(2, 12) + '@test.com';
     const registerRes = await request(app).post('/api/auth').send(testUser);
@@ -30,7 +41,7 @@ test('get the menu', async () => {
     
     expect(menuRes.status).toBe(200);
     expect(Array.isArray(menuRes.body)).toBe(true);
-    //expect(menuRes.body.length).toBeGreaterThan(0);
+    expect(menuRes.body.length).toBeGreaterThan(0);
 
     const expectedFirstMenuItem = { 
         id: 1,
@@ -44,11 +55,6 @@ test('get the menu', async () => {
 
 test('add to menu', async () => {
     // create an admin user
-    const adminUser = await createAdminUser();
-    const loginRes = await request(app).put('/api/auth').send({ email: adminUser.email, password: adminUser.password });
-    expect(loginRes.status).toBe(200);
-    const adminAuthToken = loginRes.body.token;
-
     const addMenuItem = { id: 1, title: 'neapolitano', description: 'tomato, mozarella, basil, mmm', image: 'pizza9.png', price: 0.0002 };
     const addMenuItemRes = await request(app).put('/api/order/menu').set('Authorization', `Bearer ${adminAuthToken}`).send(addMenuItem);
     expect(addMenuItemRes.status).toBe(200);
