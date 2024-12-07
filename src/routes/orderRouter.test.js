@@ -78,6 +78,14 @@ test('create an order', async () => {
     expect(orderRes.body.order).toMatchObject(order);
 });
 
+test('get orders', async () => {
+    const orderRes = await request(app).get('/api/order').set('Authorization', `Bearer ${testUserAuthToken}`);
+    expect(orderRes.status).toBe(200);
+    expect(orderRes.body.dinerId).toBe(testUser.id);
+    expect(orderRes.body.orders).toBeDefined();
+    expect(orderRes.body.page).toBeDefined();
+});
+
 function randomName() {
     return Math.random().toString(36).substring(2, 8);
 }
