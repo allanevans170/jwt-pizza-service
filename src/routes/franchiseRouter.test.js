@@ -54,7 +54,7 @@ test('create a new franchise', async () => {
 // delete a franchise
 test('delete a franchise', async () => {
     const adminAuthToken = loginRes.body.token;
-    const franchiseID = loginRes.body.id;
+    const franchiseID = createFranchiseRes.body.id;
 
     const deleteFranchiseRes = await request(app).delete(`/api/franchise/${franchiseID}`).set('Authorization', `Bearer ${adminAuthToken}`);
     expect(deleteFranchiseRes.status).toBe(200);
@@ -63,7 +63,7 @@ test('delete a franchise', async () => {
 
 // delete a franchise without admin credentials
 test('delete a franchise without admin authtoken', async () => {
-    const franchiseID = loginRes.body.id;
+    const franchiseID = createFranchiseRes.body.id;
     // creating a new unauthorized user
     const testUser = { name: 'unauthorizedDeleter', email: 'unAuthDel@test.com', password: 'a' };
     const testRegRes = await request(app).post('/api/auth').send(testUser);
@@ -75,12 +75,16 @@ test('delete a franchise without admin authtoken', async () => {
     expect(deleteFranchiseRes.body).toMatchObject({ message: 'unable to delete a franchise' });
 });
 
-
-
-
 // create a store attached to a franchise 
 test('create a new store', async () => {
-    console.log("create a new store");
+    //console.log("create a new store");
+    const franchiseID = createFranchiseRes.body.id;
+   
+    const store = { name: 'midici', address: '671 Lincoln Ave', phone: '800-555-6666' };
+    const createStoreRes = await request(app).post(`/api/franchise/${franchiseID}/store`).set('Authorization', `Bearer ${adminAuthToken}`).send(store);
+
+    expect(createStoreRes.status).toBe(200);
+    expect(createStoreRes.body.name).toBe(store.name);
 })
 
 // delete a store attached to a franchise

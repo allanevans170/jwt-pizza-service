@@ -45,6 +45,13 @@ test('update user', async () => {
     // password is not returned in the response SECURITY RISK
 });
 
+test('failed login', async () => {
+    const badLoginRes = await request(app).put('/api/auth').send({ ...testUser, password: 'b' });
+    console.log(badLoginRes.body);
+    expect(badLoginRes.status).toBe(404);
+    expect(badLoginRes.body).toMatchObject({ message: 'unknown user' });
+})
+
 function expectValidJwt(potentialJwt) {
     expect(potentialJwt).toMatch(/^[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*$/);
 }
