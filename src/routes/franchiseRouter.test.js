@@ -77,7 +77,7 @@ test('create a new store', async () => {
    
     const store = { name: 'midici', address: '671 Lincoln Ave', phone: '800-555-6666' };
     const createStoreRes = await request(app).post(`/api/franchise/${franchiseID}/store`).set('Authorization', `Bearer ${adminAuthToken}`).send(store);
-    // const storeID = createStoreRes.body.id;
+    // giconst storeID = createStoreRes.body.id;
     expect(createStoreRes.status).toBe(200);
     expect(createStoreRes.body.name).toBe(store.name);
 })
