@@ -77,7 +77,7 @@ test('create a new store', async () => {
    
     const store = { name: 'midici', address: '671 Lincoln Ave', phone: '800-555-6666' };
     const createStoreRes = await request(app).post(`/api/franchise/${franchiseID}/store`).set('Authorization', `Bearer ${adminAuthToken}`).send(store);
-    storeID = createStoreRes.body.id;
+    // const storeID = createStoreRes.body.id;
     expect(createStoreRes.status).toBe(200);
     expect(createStoreRes.body.name).toBe(store.name);
 })
@@ -94,27 +94,12 @@ test('delete a store', async () => {
     expect(deleteStoreRes.body).toEqual({ message: 'store deleted' });
 });
 
-// delete a store attached to a franchise
-
-
-// test('list all franchises', async () => {
-//     const testFranchise2 = { name: 'pizzaObama', admins: [{ email: 'obama@admin.com'}] };
-
-
-//     const listAllRes = await request(app).get('/api/franchise');
-
-//     expect(listAllRes.status).toBe(200);
-//     //console.log(listAllRes.body);
-//     expect(Array.isArray(listAllRes.body)).toBe(true);
-//     expect(listAllRes.body).toEqual(expect.arrayContaining([expect.objectContaining({ name: testFranchise2.name, admins: expect.arrayContaining([expect.objectContaining({ email: testFranchise2.admins[0].email })]) })]));
-// });
-// test('list all franchises', async () => {
-//     const listAllRes = await request(app).get('/api/franchise');
-//     expect(listAllRes.status).toBe(200);
-//     expect(listAllRes.body).toEqual(expect.arrayContaining([expect.objectContaining({ "id": 1, "name": "pizzaMama", "})]));
-// });
-
-    // response: { name: 'pizzaPocket', admins: [{ email: 'f@jwt.com', id: 4, name: 'pizza franchisee' }], id: 1 },
+test('get franchises', async () => {
+    const getFranchiseRes = await request(app).get('/api/franchise').set('Authorization', `Bearer ${adminAuthToken}`);
+    expect(getFranchiseRes.status).toBe(200);
+    expect(Array.isArray(getFranchiseRes.body)).toBe(true);
+    console.log(getFranchiseRes.body);
+});
 
 function randomName() {
     return Math.random().toString(36).substring(2, 8);
