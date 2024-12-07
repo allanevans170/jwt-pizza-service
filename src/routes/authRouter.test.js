@@ -45,6 +45,16 @@ test('update user', async () => {
     // password is not returned in the response SECURITY RISK
 });
 
+test('unauthorized update user fail', async () => {
+    const updatedUser = { email: 'updated@hotmail.com', password: 'new'};
+    const badId = testUser.id + 1;
+    const updateUserRes = await request(app).put(`/api/auth/${badId}`).set('Authorization', `Bearer ${testUserAuthToken}`).send(updatedUser);
+    
+    expect(updateUserRes.status).toBe(403);
+    expect(updateUserRes.body).toMatchObject({ message: 'unauthorized'});
+    // password is not returned in the response SECURITY RISK
+});
+
 test('failed login', async () => {
     const badLoginRes = await request(app).put('/api/auth').send({ ...testUser, password: 'b' });
     console.log(badLoginRes.body);

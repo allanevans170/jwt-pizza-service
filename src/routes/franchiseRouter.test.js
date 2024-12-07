@@ -1,14 +1,8 @@
 const request = require('supertest');
 const app = require('../service');
 
-//const testUser = { name: 'pizza franchisee!', email: 'reg@test.com', password: 'a' };
-//const testFranchise = { name: 'pizzaMama', admins: [{ email: 'reg@test.com'}]}
-//let testUserAuthToken;
-
-//const adminUser = { name: 'admin', email: '};
-
 const { Role, DB } = require('../database/database.js');
-const { StatusCodeError } = require('../endpointHelper.js');
+// const { StatusCodeError } = require('../endpointHelper.js');
 
 async function createAdminUser() {
     let user = { password: 'toomanysecrets', roles: [{role: Role.Admin}] };
@@ -76,16 +70,29 @@ test('delete a franchise without admin authtoken', async () => {
 });
 
 // create a store attached to a franchise 
+
 test('create a new store', async () => {
     //console.log("create a new store");
     const franchiseID = createFranchiseRes.body.id;
    
     const store = { name: 'midici', address: '671 Lincoln Ave', phone: '800-555-6666' };
     const createStoreRes = await request(app).post(`/api/franchise/${franchiseID}/store`).set('Authorization', `Bearer ${adminAuthToken}`).send(store);
-
+    storeID = createStoreRes.body.id;
     expect(createStoreRes.status).toBe(200);
     expect(createStoreRes.body.name).toBe(store.name);
 })
+
+test('delete a store', async () => {
+    const franchiseID = createFranchiseRes.body.id;
+    const store = { name: 'to be deleted', address: '12 Main St', phone: '800-666-9999' };
+    const createStoreRes = await request(app).post(`/api/franchise/${franchiseID}/store`).set('Authorization', `Bearer ${adminAuthToken}`).send(store);
+    expect(createStoreRes.status).toBe(200);
+    const storeID = createStoreRes.body.id;
+    
+    const deleteStoreRes = await request(app).delete(`/api/franchise/${franchiseID}/store/${storeID}`).set('Authorization', `Bearer ${adminAuthToken}`);
+    expect(deleteStoreRes.status).toBe(200);
+    expect(deleteStoreRes.body).toEqual({ message: 'store deleted' });
+});
 
 // delete a store attached to a franchise
 
