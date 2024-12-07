@@ -51,28 +51,30 @@ test('create a new franchise', async () => {
     expect(createFranchiseRes.body).toMatchObject(testFranchise);
 });
 
-// // delete a franchise without admin credentials
-// test('delete a franchise without admin authtoken', async () => {
-//     //const franchiseID = loginRes.body.id;
-//     const testUser = { name: 'unauthorizedDeleter', email: 'unAuthDel@test.com', password: 'a' };
-//     const testRegRes = await request(app).post('/api/auth').send(testUser);
-//     const testUserAuthToken = testRegRes.body.token;
-//     console.log(`Auth Token: ${testUserAuthToken}`);
+// delete a franchise
+test('delete a franchise', async () => {
+    const adminAuthToken = loginRes.body.token;
+    const franchiseID = loginRes.body.id;
 
-//     const deleteFranchiseRes = await request(app).delete(`/api/franchise/${franchiseID}`);
-//     expect(deleteFranchiseRes.status).toBe(403);
-//     //expect(new StatusCodeError).toThrow('unable to delete a franchise');
-// });
+    const deleteFranchiseRes = await request(app).delete(`/api/franchise/${franchiseID}`).set('Authorization', `Bearer ${adminAuthToken}`);
+    expect(deleteFranchiseRes.status).toBe(200);
+    expect(deleteFranchiseRes.body).toEqual({ message: 'franchise deleted' });
+});
 
-// // delete a franchise
-// test('delete a franchise', async () => {
-//     const adminAuthToken = loginRes.body.token;
-//     const franchiseID = loginRes.body.id;
+// delete a franchise without admin credentials
+test('delete a franchise without admin authtoken', async () => {
+    const franchiseID = loginRes.body.id;
+    const testUser = { name: 'unauthorizedDeleter', email: 'unAuthDel@test.com', password: 'a' };
+    const testRegRes = await request(app).post('/api/auth').send(testUser);
+    const testUserAuthToken = testRegRes.body.token;
+    console.log(`Auth Token: ${testUserAuthToken}`);
 
-//     const deleteFranchiseRes = await request(app).delete(`/api/franchise/${franchiseID}`).set('Authorization', `Bearer ${adminAuthToken}`);
-//     expect(deleteFranchiseRes.status).toBe(200);
-//     expect(deleteFranchiseRes.body).toEqual({ message: 'franchise deleted' });
-// });
+    const deleteFranchiseRes = await request(app).delete(`/api/franchise/${franchiseID}`);
+    expect(deleteFranchiseRes.status).toBe(403);
+    expect(new StatusCodeError).toThrow('unable to delete a franchise');
+});
+
+
 
 
 // create a store attached to a franchise 
