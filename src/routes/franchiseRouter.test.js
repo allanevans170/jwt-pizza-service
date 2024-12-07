@@ -42,7 +42,7 @@ beforeEach(async () => {
         .post('/api/franchise')
         .set('Authorization', `Bearer ${adminAuthToken}`)
         .send(testFranchise);
-    console.log(createFranchiseRes.body);
+    //console.log(createFranchiseRes.body);
 });
 
 test('create a new franchise', async () => {
@@ -64,14 +64,15 @@ test('delete a franchise', async () => {
 // delete a franchise without admin credentials
 test('delete a franchise without admin authtoken', async () => {
     const franchiseID = loginRes.body.id;
+    // creating a new unauthorized user
     const testUser = { name: 'unauthorizedDeleter', email: 'unAuthDel@test.com', password: 'a' };
     const testRegRes = await request(app).post('/api/auth').send(testUser);
     const testUserAuthToken = testRegRes.body.token;
-    console.log(`Auth Token: ${testUserAuthToken}`);
+    //console.log(`Auth Token: ${testUserAuthToken}`);
 
-    const deleteFranchiseRes = await request(app).delete(`/api/franchise/${franchiseID}`);
+    const deleteFranchiseRes = await request(app).delete(`/api/franchise/${franchiseID}`).set('Authorization', `Bearer ${testUserAuthToken}`);
     expect(deleteFranchiseRes.status).toBe(403);
-    expect(new StatusCodeError).toThrow('unable to delete a franchise');
+    expect(deleteFranchiseRes.body).toMatchObject({ message: 'unable to delete a franchise' });
 });
 
 
