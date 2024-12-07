@@ -42,7 +42,6 @@ beforeEach(async () => {
 });
 
 test('create a new franchise', async () => {
-
     // const adminAuthToken = loginRes.body.token;
     // const franchiseName = randomName();
     // const testFranchise = { name: 'pizza' + franchiseName, admins: [{ email: adminUser.email }] };
