@@ -38,7 +38,6 @@ test('logout', async () => {
 
 test('update user', async () => {
     const updatedUser = { email: 'updated@hotmail.com', password: 'new'};
-    console.log(testUser.id);
     const updateUserRes = await request(app).put(`/api/auth/${testUser.id}`).set('Authorization', `Bearer ${testUserAuthToken}`).send(updatedUser);
     
     expect(updateUserRes.status).toBe(200);
