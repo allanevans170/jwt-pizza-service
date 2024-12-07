@@ -12,7 +12,7 @@ async function createAdminUser() {
     user = await DB.addUser(user);
     return { ...user, password: 'toomanysecrets' };
 }
-
+let adminUser;
 let adminUserId;
 let adminAuthToken;
 let testUserAuthToken
@@ -95,9 +95,7 @@ test('create a new store failure - not admin', async () => {
 
 test('unable to delete store - not admin', async () => {
     const franchiseID = createFranchiseRes.body.id;
-    const store = { name: 'midici', address: '671 Lincoln Ave', phone: '800-555-6666' };
     const deleteStoreRes = await request(app).delete(`/api/franchise/${franchiseID}/store/1`).set('Authorization', `Bearer ${testUserAuthToken}`);
-    // console.log(deleteStoreRes.body);
     expect(deleteStoreRes.status).toBe(403);
     expect(deleteStoreRes.body).toMatchObject({ message: 'unable to delete a store' });
 });
