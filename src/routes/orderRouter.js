@@ -58,9 +58,10 @@ orderRouter.put(
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
     if (!req.user.isRole(Role.Admin)) {
-      throw new StatusCodeError('unable to add menu item', 403);
       // metrics: unauthorized request
       metrics.incrementUnauthorizedRequests();
+      throw new StatusCodeError('unable to add menu item', 403);
+    
     }
 
     const addMenuItemReq = req.body;

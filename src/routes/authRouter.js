@@ -60,9 +60,9 @@ async function setAuthUser(req, res, next) {
 // Authenticate token
 authRouter.authenticateToken = (req, res, next) => {
   if (!req.user) {
-    return res.status(401).send({ message: 'unauthorized' });
     // METRICS: unauthorized requests
     metrics.incrementUnauthorizedRequests();
+    return res.status(401).send({ message: 'unauthorized' });
   }
   // METRICS: auth tokens created
   metrics.incrementAuthTokensCreated();
@@ -119,9 +119,9 @@ authRouter.put(
     const userId = Number(req.params.userId);
     const user = req.user;
     if (user.id !== userId && !user.isRole(Role.Admin)) {
-      return res.status(403).json({ message: 'unauthorized' });
       // METRICS: unauthorized requests
       metrics.incrementUnauthorizedRequests();
+      return res.status(403).json({ message: 'unauthorized' });
     }
 
     const updatedUser = await DB.updateUser(userId, email, password);
