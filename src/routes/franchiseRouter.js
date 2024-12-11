@@ -4,6 +4,9 @@ const { authRouter } = require('./authRouter.js');
 const { StatusCodeError, asyncHandler } = require('../endpointHelper.js');
 
 const franchiseRouter = express.Router();
+// observability
+const metrics = require('../metrics');
+app.use(metrics.requestTracker);
 
 franchiseRouter.endpoints = [
   {
