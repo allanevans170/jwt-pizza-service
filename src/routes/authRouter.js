@@ -8,6 +8,7 @@ const authRouter = express.Router();
 // observability
 const metrics = require('../metrics');
 app.use(metrics.requestTracker);
+
 authRouter.endpoints = [
   {
     method: 'POST',
@@ -61,7 +62,11 @@ async function setAuthUser(req, res, next) {
 authRouter.authenticateToken = (req, res, next) => {
   if (!req.user) {
     return res.status(401).send({ message: 'unauthorized' });
+    // METRICS: unauthorized requests
+    metrics.incrementUnauthorizedRequests();
   }
+  // METRICS: auth tokens created
+  metrics.incrementAuthTokensCreated();
   next();
 };
 
@@ -76,6 +81,8 @@ authRouter.post(
     const user = await DB.addUser({ name, email, password, roles: [{ role: Role.Diner }] });
     const auth = await setAuth(user);
     res.json({ user: user, token: auth });
+    // METRICS: users registered
+    metrics.incrementUsersRegistered();
   })
 );
 
@@ -87,6 +94,8 @@ authRouter.put(
     const user = await DB.getUser(email, password);
     const auth = await setAuth(user);
     res.json({ user: user, token: auth });
+    // METRICS: users logged in
+    metrics.incrementUsersLoggedIn();
   })
 );
 
@@ -97,6 +106,8 @@ authRouter.delete(
   asyncHandler(async (req, res) => {
     await clearAuth(req);
     res.json({ message: 'logout successful' });
+    // METRICS: user logged out
+    metrics.decrementUsersLoggedIn();
   })
 );
 
@@ -110,6 +121,8 @@ authRouter.put(
     const user = req.user;
     if (user.id !== userId && !user.isRole(Role.Admin)) {
       return res.status(403).json({ message: 'unauthorized' });
+      // METRICS: unauthorized requests
+      metrics.incrementUnauthorizedRequests();
     }
 
     const updatedUser = await DB.updateUser(userId, email, password);

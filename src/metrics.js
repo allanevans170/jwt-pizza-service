@@ -4,6 +4,10 @@ const os = require('os');
 class Metrics {
   constructor() {
     this.totalRequests = 0;
+    this.authTokensCreated = 0;
+    this.usersRegistered = 0;
+    this.usersLoggedIn = 0;
+    this.unauthorizedRequests = 0;
 
     // This will periodically sent metrics to Grafana
     const timer = setInterval(() => {
@@ -17,6 +21,29 @@ class Metrics {
   incrementRequests() {
     this.totalRequests++;
   }
+
+  incrementAuthtokensCreated() {
+    this.authTokensCreated++;
+  }
+
+  incrementUsersRegistered() {
+    this.usersRegistered++;
+  }
+
+  incrementUsersLoggedIn() {
+    this.usersLoggedIn++;
+  }
+  incrementUnauthorizedRequests() {
+    this.unauthorizedRequests++;
+  }
+
+  decrementUsersLoggedIn() {
+    this.usersLoggedIn--;
+  }
+
+
+
+
 
   sendMetricToGrafana(metricPrefix, httpMethod, metricName, metricValue) {
     const metric = `${metricPrefix},source=${config.source},method=${httpMethod} ${metricName}=${metricValue}`;
