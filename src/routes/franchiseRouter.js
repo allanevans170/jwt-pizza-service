@@ -6,7 +6,6 @@ const { StatusCodeError, asyncHandler } = require('../endpointHelper.js');
 const franchiseRouter = express.Router();
 // observability
 const metrics = require('../metrics');
-app.use(metrics.requestTracker);
 
 franchiseRouter.endpoints = [
   {
@@ -88,10 +87,14 @@ franchiseRouter.post(
   asyncHandler(async (req, res) => {
     if (!req.user.isRole(Role.Admin)) {
       throw new StatusCodeError('unable to create a franchise', 403);
+      // Metrics: incrementUnauthorizedRequests();
+      metrics.incrementUnauthorizedRequests();
     }
 
     const franchise = req.body;
     res.send(await DB.createFranchise(franchise));
+    // Metrics: add a franchise
+    metrics.incrementFranchises();
   })
 );
 
@@ -101,11 +104,15 @@ franchiseRouter.delete(
   asyncHandler(async (req, res) => {
     if (!req.user.isRole(Role.Admin)) {
       throw new StatusCodeError('unable to delete a franchise', 403);
+      // Metrics: incrementUnauthorizedRequests();
+      metrics.incrementUnauthorizedRequests();
     }
 
     const franchiseId = Number(req.params.franchiseId);
     await DB.deleteFranchise(franchiseId);
     res.json({ message: 'franchise deleted' });
+    // Metrics: remove a franchise
+    metrics.decrementFranchises();
   })
 );
 
@@ -118,9 +125,13 @@ franchiseRouter.post(
     const franchise = await DB.getFranchise({ id: franchiseId });
     if (!franchise || (!req.user.isRole(Role.Admin) && !franchise.admins.some((admin) => admin.id === req.user.id))) {
       throw new StatusCodeError('unable to create a store', 403);
+      // Metrics: incrementUnauthorizedRequests();
+      metrics.incrementUnauthorizedRequests();
     }
 
     res.send(await DB.createStore(franchise.id, req.body));
+    // Metrics: add a store
+    metrics.incrementNumActiveStores();
   })
 );
 
@@ -133,11 +144,15 @@ franchiseRouter.delete(
     const franchise = await DB.getFranchise({ id: franchiseId });
     if (!franchise || (!req.user.isRole(Role.Admin) && !franchise.admins.some((admin) => admin.id === req.user.id))) {
       throw new StatusCodeError('unable to delete a store', 403);
+      // Metrics: incrementUnauthorizedRequests();
+      metrics.incrementUnauthorizedRequests();
     }
 
     const storeId = Number(req.params.storeId);
     await DB.deleteStore(franchiseId, storeId);
     res.json({ message: 'store deleted' });
+    // Metrics: remove a store
+    metrics.decrementNumActiveStores();
   })
 );
 

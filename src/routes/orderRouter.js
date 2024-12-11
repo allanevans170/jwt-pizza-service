@@ -7,7 +7,6 @@ const { asyncHandler, StatusCodeError } = require('../endpointHelper.js');
 const orderRouter = express.Router();
 // observability
 const metrics = require('../metrics');
-app.use(metrics.requestTracker);
 
 orderRouter.endpoints = [
   {
@@ -48,6 +47,8 @@ orderRouter.get(
   '/menu',
   asyncHandler(async (req, res) => {
     res.send(await DB.getMenu());
+    // metrics: menu request
+    metrics.incrementMenuHits();
   })
 );
 
@@ -58,6 +59,8 @@ orderRouter.put(
   asyncHandler(async (req, res) => {
     if (!req.user.isRole(Role.Admin)) {
       throw new StatusCodeError('unable to add menu item', 403);
+      // metrics: unauthorized request
+      metrics.incrementUnauthorizedRequests();
     }
 
     const addMenuItemReq = req.body;
@@ -90,8 +93,13 @@ orderRouter.post(
     const j = await r.json();
     if (r.ok) {
       res.send({ order, jwt: j.jwt, reportUrl: j.reportUrl });
+      // metrics: fulfilled orders and the revenue
+      metrics.incrementRevenue(order.items.reduce((acc, item) => acc + item.price, 0)); // don't know if this will work...
+      metrics.incrementOrders();
     } else {
       res.status(500).send({ message: 'Failed to fulfill order at factory', reportUrl: j.reportUrl });
+      // metrics: failed orders
+      metrics.incrementFailedOrders();
     }
   })
 );

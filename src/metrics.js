@@ -1,4 +1,4 @@
-const config = require('./config.json');
+const config = require('./config.js');
 const os = require('os');
 
 class Metrics {
@@ -8,9 +8,16 @@ class Metrics {
     this.usersRegistered = 0;
     this.usersLoggedIn = 0;
     this.unauthorizedRequests = 0;
+    this.numFranchises = 0;
+    this.numStoresCreated = 0;
+    this.menuHits = 0;
+    this.totalOrders = 0;
+    this.failedOrders = 0;
+    this.totalRevenue = 0;
 
     // This will periodically sent metrics to Grafana
     const timer = setInterval(() => {
+      
       this.sendMetricToGrafana('request', 'all', 'total', this.totalRequests);
       this.sendMetricToGrafana('cpu', 'all', 'usage', getCpuUsagePercentage());
       this.sendMetricToGrafana('memory', 'all', 'usage', getMemoryUsagePercentage());
@@ -18,6 +25,13 @@ class Metrics {
     timer.unref();
   }
 
+  requestTracker(req, res, next) {
+    const method = req.method.toUpperCase();
+    if (method === 'GET' || method === 'POST' || method === 'PUT' || method === 'DELETE') {
+      this.incrementRequests();
+    }
+    next();
+  }
   incrementRequests() {
     this.totalRequests++;
   }
@@ -25,33 +39,50 @@ class Metrics {
   incrementAuthtokensCreated() {
     this.authTokensCreated++;
   }
-
   incrementUsersRegistered() {
     this.usersRegistered++;
   }
-
   incrementUsersLoggedIn() {
     this.usersLoggedIn++;
   }
   incrementUnauthorizedRequests() {
     this.unauthorizedRequests++;
   }
-
   decrementUsersLoggedIn() {
     this.usersLoggedIn--;
   }
-
-
-
-
+  incrementNumActiveStores() {
+    this.numStoresCreated++;
+  }
+  decrementNumActiveStores() {
+    this.numStoresCreated--;
+  }
+  incrementFranchises() {
+    this.numFranchises++;
+  }
+  decrementFranchises() {
+    this.numFranchises--;
+  }
+  incrementMenuHits() {
+    this.menuHits++;
+  }
+  incrementFailedOrders() {
+    this.failedOrders++;
+  }
+  incrementOrders() {
+    this.totalOrders++;
+  }
+  incrementRevenue(amount) {
+    this.totalRevenue += amount;
+  }
 
   sendMetricToGrafana(metricPrefix, httpMethod, metricName, metricValue) {
-    const metric = `${metricPrefix},source=${config.source},method=${httpMethod} ${metricName}=${metricValue}`;
+    const metric = `${metricPrefix},source=${config.metrics.source},method=${httpMethod} ${metricName}=${metricValue}`;
 
-    fetch(`${config.url}`, {
+    fetch(`${config.metrics.url}`, {
       method: 'post',
       body: metric,
-      headers: { Authorization: `Bearer ${config.userId}:${config.apiKey}` },
+      headers: { Authorization: `Bearer ${config.metrics.userId}:${config.metrics.apiKey}` },
     })
       .then((response) => {
         if (!response.ok) {
