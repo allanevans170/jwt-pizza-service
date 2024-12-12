@@ -1,7 +1,5 @@
-    const config = require('./config.js');
-    const os = require('os');
-
-    
+const config = require('./config.js');
+const os = require('os');
 
 class Metrics {
     constructor() {
@@ -147,9 +145,9 @@ function sendMetricsPeriodically(period) {
             const buf = new MetricBuilder();
             httpMetrics(buf);
             systemMetrics(buf);
-            userMetrics(buf);
-            purchaseMetrics(buf);
-            authMetrics(buf);
+            //userMetrics(buf);
+            //purchaseMetrics(buf);
+            //authMetrics(buf);
 
             const metrics = buf.toString('\n');
             this.sendMetricToGrafana(metrics);
@@ -157,6 +155,7 @@ function sendMetricsPeriodically(period) {
             console.log('Error sending metrics', error);
         }
     }, period);
+    timer.unref(); // here we go again lint
 }
 
 function httpMetrics(buf) {
