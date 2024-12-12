@@ -23,20 +23,20 @@ class Metrics {
 
         sendMetricsPeriodically(10000, this.sendMetricToGrafana.bind(this));
 
-        const timer = setInterval(() => {
-            //this.sendMetricToGrafana('auth', 'all', 'created', this.authTokensCreated);
-            //this.sendMetricToGrafana('auth', 'all', 'failed', this.unauthorizedRequests);
+        // const timer = setInterval(() => {
+        //     //this.sendMetricToGrafana('auth', 'all', 'created', this.authTokensCreated);
+        //     //this.sendMetricToGrafana('auth', 'all', 'failed', this.unauthorizedRequests);
 
-            this.sendMetricToGrafana('request', 'GET', 'total', this.getRequests);
-            this.sendMetricToGrafana('request', 'POST', 'total', this.postRequests);
-            this.sendMetricToGrafana('request', 'PUT', 'total', this.putRequests);
-            this.sendMetricToGrafana('request', 'DELETE', 'total', this.deleteRequests);
-            this.sendMetricToGrafana('request', 'all', 'total', this.totalRequests);
+        //     this.sendMetricToGrafana('request', 'GET', 'total', this.getRequests);
+        //     this.sendMetricToGrafana('request', 'POST', 'total', this.postRequests);
+        //     this.sendMetricToGrafana('request', 'PUT', 'total', this.putRequests);
+        //     this.sendMetricToGrafana('request', 'DELETE', 'total', this.deleteRequests);
+        //     this.sendMetricToGrafana('request', 'all', 'total', this.totalRequests);
 
-            this.sendMetricToGrafana('cpu', 'all', 'usage', getCpuUsagePercentage());
-            this.sendMetricToGrafana('memory', 'all', 'usage', getMemoryUsagePercentage());
-        }, 10000);
-        timer.unref();
+        //     this.sendMetricToGrafana('cpu', 'all', 'usage', getCpuUsagePercentage());
+        //     this.sendMetricToGrafana('memory', 'all', 'usage', getMemoryUsagePercentage());
+        // }, 10000);
+        // timer.unref();
     }
 
     requestTracker(req, res, next) {
