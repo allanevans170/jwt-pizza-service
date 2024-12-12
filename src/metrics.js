@@ -4,6 +4,11 @@ const os = require('os');
 class Metrics {
   constructor() {
     this.totalRequests = 0;
+    this.getRequests = 0;
+    this.postRequests = 0;
+    this.putRequests = 0;
+    this.deleteRequests = 0;
+
     this.authTokensCreated = 0;
     this.usersRegistered = 0;
     this.usersLoggedIn = 0;
@@ -14,10 +19,13 @@ class Metrics {
     this.totalOrders = 0;
     this.failedOrders = 0;
     this.totalRevenue = 0;
-
+    
     // This will periodically sent metrics to Grafana
     const timer = setInterval(() => {
-      
+      this.sendMetricToGrafana('request', 'GET', 'total', this.getRequests);
+      this.sendMetricToGrafana('request', 'POST', 'total', this.postRequests);
+      this.sendMetricToGrafana('request', 'PUT', 'total', this.putRequests);
+      this.sendMetricToGrafana('request', 'DELETE', 'total', this.deleteRequests);
       this.sendMetricToGrafana('request', 'all', 'total', this.totalRequests);
       this.sendMetricToGrafana('cpu', 'all', 'usage', getCpuUsagePercentage());
       this.sendMetricToGrafana('memory', 'all', 'usage', getMemoryUsagePercentage());
@@ -27,15 +35,34 @@ class Metrics {
 
   requestTracker(req, res, next) {
     const method = req.method.toUpperCase();
-    if (method === 'GET' || method === 'POST' || method === 'PUT' || method === 'DELETE') {
-      this.incrementRequests();
+    
+    switch(method) {
+      case 'GET':
+        this.incrementGetRequests();
+        this.incrementRequests();
+        break;
+      case 'POST':
+        this.incrementPostRequests();
+        this.incrementRequests();
+        break;
+      case 'PUT':
+        this.incrementPutRequests();
+        this.incrementRequests();
+        break;
+      case 'DELETE':
+        this.incrementDeleteRequests();
+        this.incrementRequests();
+        break;
+      default:
+        // Optional: handle other HTTP methods or do nothing
+        break;
     }
     next();
   }
+  
   incrementRequests() {
     this.totalRequests++;
   }
-
   incrementAuthtokensCreated() {
     this.authTokensCreated++;
   }
