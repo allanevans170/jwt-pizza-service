@@ -1,8 +1,11 @@
     const config = require('./config.js');
     const os = require('os');
 
-    class Metrics {
-        constructor() {
+    
+
+class Metrics {
+    constructor() {
+        const builder = new MetricBuilder();
         this.totalRequests = 0;
         this.getRequests = 0;
         this.postRequests = 0;
@@ -20,8 +23,8 @@
         this.failedOrders = 0;
         this.totalRevenue = 0;
 
+        sendMetricsPeriodically(10000, this.sendMetricToGrafana.bind(this));
 
-        // This will periodically sent metrics to Grafana
         const timer = setInterval(() => {
             //this.sendMetricToGrafana('auth', 'all', 'created', this.authTokensCreated);
             //this.sendMetricToGrafana('auth', 'all', 'failed', this.unauthorizedRequests);
@@ -40,7 +43,6 @@
 
     requestTracker(req, res, next) {
         const method = req.method.toUpperCase();
-
         switch(method) {
             case 'GET':
             this.incrementGetRequests();
@@ -138,27 +140,6 @@
         });
     }
 }
-class MetricBuilder {
-    constructor() {
-        this.metrics = [];
-    }
-  
-    add(metric) {
-        this.metrics.push(metric);
-    }
-  
-    toString(separator = '\n') {
-        return this.metrics.join(separator);
-    }
-  
-    sendMetricsPeriodically(intervalMs, sendFunction) {
-        setInterval(() => {
-            const metricsString = this.toString();
-            sendFunction(metricsString);
-            this.metrics = []; // Clear metrics after sending
-        }, intervalMs);
-    }
-}
 
 function sendMetricsPeriodically(period) {
     const timer = setInterval(() => {
@@ -177,6 +158,21 @@ function sendMetricsPeriodically(period) {
         }
     }, period);
 }
+
+function httpMetrics(buf) {
+    buf.add(`http,source=${config.metrics.source} method=GET count=${metrics.getRequests}`);
+    buf.add(`http,source=${config.metrics.source} method=POST count=${metrics.postRequests}`);
+    buf.add(`http,source=${config.metrics.source} method=PUT count=${metrics.putRequests}`);
+    buf.add(`http,source=${config.metrics.source} method=DELETE count=${metrics.deleteRequests}`);
+    buf.add(`http,source=${config.metrics.source} method=ALL count=${metrics.totalRequests}`);
+}
+
+function systemMetrics(buf) {
+    const cpuUsage = getCpuUsagePercentage();
+    const memoryUsage = getMemoryUsagePercentage();
+    buf.add(`cpu,source=${config.metrics.source} usage=${cpuUsage}`);
+    buf.add(`memory,source=${config.metrics.source} usage=${memoryUsage}`);
+}
   
 function getCpuUsagePercentage() {
     const cpuUsage = os.loadavg()[0] / os.cpus().length;
@@ -190,7 +186,24 @@ function getMemoryUsagePercentage() {
     const memoryUsage = (usedMemory / totalMemory) * 100;
     return memoryUsage.toFixed(2);
 }
+class MetricBuilder {
+    constructor() {
+        this.metrics = [];
+    }
+    add(metric) {
+        this.metrics.push(metric);
+    }
+    toString(separator = '\n') {
+        return this.metrics.join(separator);
+    }
+    sendMetricsPeriodically(intervalMs, sendFunction) {
+        setInterval(() => {
+            const metricsString = this.toString();
+            sendFunction(metricsString);
+            this.metrics = []; // Clear metrics after sending
+        }, intervalMs);
+    }
+}
 
-   
-    const metrics = new Metrics();
-    module.exports = metrics;
+const metrics = new Metrics();
+module.exports = metrics;
