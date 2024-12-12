@@ -3,7 +3,6 @@ const os = require('os');
 
 class Metrics {
     constructor() {
-        const builder = new MetricBuilder();
         this.totalRequests = 0;
         this.getRequests = 0;
         this.postRequests = 0;
