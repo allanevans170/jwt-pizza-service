@@ -1,8 +1,8 @@
 const config = require('./config.js');
-const os = require('os');
+    const os = require('os');
 
-class Metrics {
-    constructor() {
+    class Metrics {
+        constructor() {
         this.totalRequests = 0;
         this.getRequests = 0;
         this.postRequests = 0;
@@ -20,30 +20,35 @@ class Metrics {
         this.failedOrders = 0;
         this.totalRevenue = 0;
 
-        //sendMetricsPeriodically(10000, this.sendMetricToGrafana.bind(this));
+        // function sendMetricsPeriodically(period) {
+        //     const timer = setInterval(() => {
+        //       try {
+        //         const buf = new MetricBuilder();
+        //         httpMetrics(buf);
+        //         systemMetrics(buf);
+        //         userMetrics(buf);
+        //         purchaseMetrics(buf);
+        //         authMetrics(buf);
 
+        //         const metrics = buf.toString('\n');
+        //         this.sendMetricToGrafana(metrics);
+        //       } catch (error) {
+        //         console.log('Error sending metrics', error);
+        //       }
+        //     }, period);
+        // }
+
+
+        // This will periodically sent metrics to Grafana
         const timer = setInterval(() => {
-            //this.sendMetricToGrafana('auth', 'all', 'tokens', this.authTokensCreated);
-            //this.sendMetricToGrafana('auth', 'all', 'unauthorized', this.unauthorizedRequests);
+            //this.sendMetricToGrafana('auth', 'all', 'created', this.authTokensCreated);
+            //this.sendMetricToGrafana('auth', 'all', 'failed', this.unauthorizedRequests);
 
-            //this.sendMetricToGrafana('user', 'all', 'registered', this.usersRegistered);
-            //this.sendMetricToGrafana('user', 'all', 'logged-in', this.usersLoggedIn);
-        
-            //this.sendMetricToGrafana('store', 'all', 'created', this.numStoresCreated);
-            //this.sendMetricToGrafana('store', 'all', 'deleted', this.numStoresDeleted);
-
-            //this.sendMetricToGrafana('order', 'all', 'total', this.totalOrders);
-            //this.sendMetricToGrafana('order', 'all', 'failed', this.failedOrders);
-            //this.sendMetricToGrafana('order', 'all', 'revenue', this.totalRevenue);
-
-            //this.sendMetricToGrafana('franchise', 'all', 'total', this.numFranchises);
-            //this.sendMetricToGrafana('menu', 'all', 'hits', this.menuHits);
-
-            this.sendMetricToGrafana('http', 'GET', 'count', this.getRequests);
-            this.sendMetricToGrafana('http', 'POST', 'count', this.postRequests);
-            this.sendMetricToGrafana('http', 'PUT', 'count', this.putRequests);
-            this.sendMetricToGrafana('http', 'DELETE', 'count', this.deleteRequests);
-            this.sendMetricToGrafana('http', 'ALL', 'count', this.totalRequests);
+            this.sendMetricToGrafana('request', 'GET', 'total', this.getRequests);
+            this.sendMetricToGrafana('request', 'POST', 'total', this.postRequests);
+            this.sendMetricToGrafana('request', 'PUT', 'total', this.putRequests);
+            this.sendMetricToGrafana('request', 'DELETE', 'total', this.deleteRequests);
+            this.sendMetricToGrafana('request', 'all', 'total', this.totalRequests);
 
             this.sendMetricToGrafana('cpu', 'all', 'usage', getCpuUsagePercentage());
             this.sendMetricToGrafana('memory', 'all', 'usage', getMemoryUsagePercentage());
@@ -52,27 +57,27 @@ class Metrics {
     }
 
     requestTracker(req, res, next) {
-        const method = req.method.toUpperCase();
-        switch(method) {
-            case 'GET':
-                this.incrementGetRequests();
-                break;
-            case 'POST':
-                this.incrementPostRequests();
-                break;
-            case 'PUT':
-                this.incrementPutRequests();
-                break;
-            case 'DELETE':
-                this.incrementDeleteRequests();
-                break;
-            default:
-                // Optional: handle other HTTP methods or do nothing
-                break;
-        }
-        next();
+    const method = req.method.toUpperCase();
+
+    switch(method) {
+        case 'GET':
+        this.incrementGetRequests();
+        break;
+        case 'POST':
+        this.incrementPostRequests();
+        break;
+        case 'PUT':
+        this.incrementPutRequests();
+        break;
+        case 'DELETE':
+        this.incrementDeleteRequests();
+        break;
+        default:
+        // Optional: handle other HTTP methods or do nothing
+        break;
     }
-   
+    next();
+    }
     incrementGetRequests() {
         this.getRequests++;
         this.totalRequests++;
@@ -89,6 +94,7 @@ class Metrics {
         this.deleteRequests++;
         this.totalRequests++;
     }
+    
     incrementAuthtokensCreated() {
         this.authTokensCreated++;
     }
@@ -150,40 +156,6 @@ class Metrics {
     }
 }
 
-// function sendMetricsPeriodically(period) {
-//     const timer = setInterval(() => {
-//         try {
-//             const buf = new MetricBuilder();
-//             httpMetrics(buf);
-//             systemMetrics(buf);
-//             //userMetrics(buf);
-//             //purchaseMetrics(buf);
-//             //authMetrics(buf);
-
-//             const metrics = buf.toString('\n');
-//             this.sendMetricToGrafana(metrics);
-//         } catch (error) {
-//             console.log('Error sending metrics', error);
-//         }
-//     }, period);
-//     timer.unref(); 
-// }
-
-// function httpMetrics(buf) {
-//     buf.add(`http,source=${config.metrics.source} method=GET count=${metrics.getRequests}`);
-//     buf.add(`http,source=${config.metrics.source} method=POST count=${metrics.postRequests}`);
-//     buf.add(`http,source=${config.metrics.source} method=PUT count=${metrics.putRequests}`);
-//     buf.add(`http,source=${config.metrics.source} method=DELETE count=${metrics.deleteRequests}`);
-//     buf.add(`http,source=${config.metrics.source} method=ALL count=${metrics.totalRequests}`);
-// }
-
-// function systemMetrics(buf) {
-//     const cpuUsage = getCpuUsagePercentage();
-//     const memoryUsage = getMemoryUsagePercentage();
-//     buf.add(`cpu,source=${config.metrics.source} usage=${cpuUsage}`);
-//     buf.add(`memory,source=${config.metrics.source} usage=${memoryUsage}`);
-// }
-  
 function getCpuUsagePercentage() {
     const cpuUsage = os.loadavg()[0] / os.cpus().length;
     return cpuUsage.toFixed(2) * 100;
@@ -196,24 +168,7 @@ function getMemoryUsagePercentage() {
     const memoryUsage = (usedMemory / totalMemory) * 100;
     return memoryUsage.toFixed(2);
 }
-// class MetricBuilder {
-//     constructor() {
-//         this.metrics = [];
-//     }
-//     add(metric) {
-//         this.metrics.push(metric);
-//     }
-//     toString(separator = '\n') {
-//         return this.metrics.join(separator);
-//     }
-//     sendMetricsPeriodically(intervalMs, sendFunction) {
-//         setInterval(() => {
-//             const metricsString = this.toString();
-//             sendFunction(metricsString);
-//             this.metrics = []; // Clear metrics after sending
-//         }, intervalMs);
-//     }
-// }
 
-const metrics = new Metrics();
-module.exports = metrics;
+   
+    const metrics = new Metrics();
+    module.exports = metrics;
