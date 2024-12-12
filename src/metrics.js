@@ -20,7 +20,7 @@ class Metrics {
         this.failedOrders = 0;
         this.totalRevenue = 0;
 
-        sendMetricsPeriodically(10000, this.sendMetricToGrafana.bind(this));
+        //sendMetricsPeriodically(10000, this.sendMetricToGrafana.bind(this));
 
         const timer = setInterval(() => {
             //this.sendMetricToGrafana('auth', 'all', 'tokens', this.authTokensCreated);
@@ -89,7 +89,6 @@ class Metrics {
         this.deleteRequests++;
         this.totalRequests++;
     }
-
     incrementAuthtokensCreated() {
         this.authTokensCreated++;
     }
