@@ -38,7 +38,6 @@ const config = require('./config.js');
         //     }, period);
         // }
 
-
         // This will periodically sent metrics to Grafana
         const timer = setInterval(() => {
             //this.sendMetricToGrafana('auth', 'all', 'created', this.authTokensCreated);
@@ -48,7 +47,7 @@ const config = require('./config.js');
             this.sendMetricToGrafana('request', 'POST', 'total', this.postRequests);
             this.sendMetricToGrafana('request', 'PUT', 'total', this.putRequests);
             this.sendMetricToGrafana('request', 'DELETE', 'total', this.deleteRequests);
-            this.sendMetricToGrafana('request', 'all', 'total', this.totalRequests);
+            this.sendMetricToGrafana('request', 'ALL', 'total', this.totalRequests);
 
             this.sendMetricToGrafana('cpu', 'all', 'usage', getCpuUsagePercentage());
             this.sendMetricToGrafana('memory', 'all', 'usage', getMemoryUsagePercentage());
@@ -57,26 +56,25 @@ const config = require('./config.js');
     }
 
     requestTracker(req, res, next) {
-    const method = req.method.toUpperCase();
-
-    switch(method) {
-        case 'GET':
-        this.incrementGetRequests();
-        break;
-        case 'POST':
-        this.incrementPostRequests();
-        break;
-        case 'PUT':
-        this.incrementPutRequests();
-        break;
-        case 'DELETE':
-        this.incrementDeleteRequests();
-        break;
-        default:
-        // Optional: handle other HTTP methods or do nothing
-        break;
-    }
-    next();
+        const method = req.method.toUpperCase();
+        switch(method) {
+            case 'GET':
+                this.incrementGetRequests();
+                break;
+            case 'POST':
+                this.incrementPostRequests();
+                break;
+            case 'PUT':
+                this.incrementPutRequests();
+                break;
+            case 'DELETE':
+                this.incrementDeleteRequests();
+                break;
+            default:
+            // Optional: handle other HTTP methods or do nothing
+                break;
+        }
+        next();
     }
     incrementGetRequests() {
         this.getRequests++;
