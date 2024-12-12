@@ -20,24 +20,6 @@
         this.failedOrders = 0;
         this.totalRevenue = 0;
 
-        // function sendMetricsPeriodically(period) {
-        //     const timer = setInterval(() => {
-        //       try {
-        //         const buf = new MetricBuilder();
-        //         httpMetrics(buf);
-        //         systemMetrics(buf);
-        //         userMetrics(buf);
-        //         purchaseMetrics(buf);
-        //         authMetrics(buf);
-
-        //         const metrics = buf.toString('\n');
-        //         this.sendMetricToGrafana(metrics);
-        //       } catch (error) {
-        //         console.log('Error sending metrics', error);
-        //       }
-        //     }, period);
-        // }
-
 
         // This will periodically sent metrics to Grafana
         const timer = setInterval(() => {
@@ -57,27 +39,28 @@
     }
 
     requestTracker(req, res, next) {
-    const method = req.method.toUpperCase();
+        const method = req.method.toUpperCase();
 
-    switch(method) {
-        case 'GET':
-        this.incrementGetRequests();
-        break;
-        case 'POST':
-        this.incrementPostRequests();
-        break;
-        case 'PUT':
-        this.incrementPutRequests();
-        break;
-        case 'DELETE':
-        this.incrementDeleteRequests();
-        break;
-        default:
-        // Optional: handle other HTTP methods or do nothing
-        break;
+        switch(method) {
+            case 'GET':
+            this.incrementGetRequests();
+            break;
+            case 'POST':
+            this.incrementPostRequests();
+            break;
+            case 'PUT':
+            this.incrementPutRequests();
+            break;
+            case 'DELETE':
+            this.incrementDeleteRequests();
+            break;
+            default:
+            // Optional: handle other HTTP methods or do nothing
+            break;
+        }
+        next();
     }
-    next();
-    }
+   
     incrementGetRequests() {
         this.getRequests++;
         this.totalRequests++;
@@ -94,7 +77,7 @@
         this.deleteRequests++;
         this.totalRequests++;
     }
-    
+
     incrementAuthtokensCreated() {
         this.authTokensCreated++;
     }
@@ -155,7 +138,46 @@
         });
     }
 }
+class MetricBuilder {
+    constructor() {
+        this.metrics = [];
+    }
+  
+    add(metric) {
+        this.metrics.push(metric);
+    }
+  
+    toString(separator = '\n') {
+        return this.metrics.join(separator);
+    }
+  
+    sendMetricsPeriodically(intervalMs, sendFunction) {
+        setInterval(() => {
+            const metricsString = this.toString();
+            sendFunction(metricsString);
+            this.metrics = []; // Clear metrics after sending
+        }, intervalMs);
+    }
+}
 
+function sendMetricsPeriodically(period) {
+    const timer = setInterval(() => {
+        try {
+            const buf = new MetricBuilder();
+            httpMetrics(buf);
+            systemMetrics(buf);
+            userMetrics(buf);
+            purchaseMetrics(buf);
+            authMetrics(buf);
+
+            const metrics = buf.toString('\n');
+            this.sendMetricToGrafana(metrics);
+        } catch (error) {
+            console.log('Error sending metrics', error);
+        }
+    }, period);
+}
+  
 function getCpuUsagePercentage() {
     const cpuUsage = os.loadavg()[0] / os.cpus().length;
     return cpuUsage.toFixed(2) * 100;
