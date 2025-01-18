@@ -93,14 +93,9 @@ orderRouter.post(
     });
     const j = await r.json();
     if (r.ok) {
-      res.send({ order, jwt: j.jwt, reportUrl: j.reportUrl });
-      // metrics: fulfilled orders and the revenue
-      metrics.incrementRevenue(order.items.reduce((acc, item) => acc + item.price, 0)); // don't know if this will work...
-      metrics.incrementOrders();
+      res.send({ order, reportSlowPizzaToFactoryUrl: j.reportUrl, jwt: j.jwt });
     } else {
-      res.status(500).send({ message: 'Failed to fulfill order at factory', reportUrl: j.reportUrl });
-      // metrics: failed orders
-      metrics.incrementFailedOrders();
+      res.status(500).send({ message: 'Failed to fulfill order at factory', reportPizzaCreationErrorToPizzaFactoryUrl: j.reportUrl });
     }
   })
 );
