@@ -65,7 +65,7 @@ authRouter.authenticateToken = (req, res, next) => {
     return res.status(401).send({ message: 'unauthorized' });
   }
   // METRICS: auth tokens created
-  metrics.incrementAuthTokensCreated();
+  //metrics.incrementAuthTokensCreated();
   next();
 };
 
