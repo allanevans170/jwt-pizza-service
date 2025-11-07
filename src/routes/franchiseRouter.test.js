@@ -106,6 +106,27 @@ test('delete a store', async () => {
     expect(deleteStoreRes.body).toEqual({ message: 'store deleted' });
 });
 
+test('unable to delete store - not admin', async () => {
+    const franchiseID = createFranchiseRes.body.id;
+    const deleteStoreRes = await request(app).delete(`/api/franchise/${franchiseID}/store/1`).set('Authorization', `Bearer ${testUserAuthToken}`);
+    expect(deleteStoreRes.status).toBe(403);
+    expect(deleteStoreRes.body).toMatchObject({ message: 'unable to delete a store' });
+});
+
+test('get franchises', async () => {
+    const getFranchiseRes = await request(app).get('/api/franchise').set('Authorization', `Bearer ${adminAuthToken}`);
+    expect(getFranchiseRes.status).toBe(200);
+    expect(Array.isArray(getFranchiseRes.body.franchises)).toBe(true);
+    //console.log(getFranchiseRes.body);
+});
+
+test('get user franchises', async () => {
+    const getFranchiseRes = await request(app).get(`/api/franchise/${adminUserId}`).set('Authorization', `Bearer ${adminAuthToken}`);
+    expect(getFranchiseRes.status).toBe(200);
+    expect(Array.isArray(getFranchiseRes.body)).toBe(true);
+    //console.log(getFranchiseRes.body);
+});
+
 function randomName() {
     return Math.random().toString(36).substring(2, 8);
 }
