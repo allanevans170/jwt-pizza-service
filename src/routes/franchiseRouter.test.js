@@ -81,19 +81,30 @@ test('create a store', async () => {
     expect(createStoreRes.body.name).toBe(testStore.name);
 })
 
-// test('get franchises', async () => {
-//     const getFranchiseRes = await request(app).get('/api/franchise').set('Authorization', `Bearer ${adminAuthToken}`);
-//     expect(getFranchiseRes.status).toBe(200);
-//     //-– expect(Array.isArray(getFranchiseRes.body)).toBe(true);
-//     //console.log(getFranchiseRes.body);
-// });
+test('unauthorized to create a store', async () => {
+    const franchiseID = createFranchiseRes.body.id;
+    const testStore = { name: 'boom pizza', address: '456 Elm St', phone: '595-4378' };
 
-// test('get user franchises', async () => {
-//     const getFranchiseRes = await request(app).get(`/api/franchise/${adminUserId}`).set('Authorization', `Bearer ${adminAuthToken}`);
-//     expect(getFranchiseRes.status).toBe(200);
-//     expect(Array.isArray(getFranchiseRes.body)).toBe(true);
-//     //console.log(getFranchiseRes.body);
-// });
+    const createStoreRes = await request(app)
+        .post(`/api/franchise/${franchiseID}/store`)
+        .set('Authorization', `Bearer ${testUserAuthToken}`)
+        .send(testStore);
+
+    expect(createStoreRes.status).toBe(403);
+    expect(createStoreRes.body).toMatchObject({ message: 'unable to create a store' });
+});
+
+test('delete a store', async () => {
+    const franchiseID = createFranchiseRes.body.id;
+    const store = { name: 'to be deleted', address: '12 Main St', phone: '800-666-9999' };
+    const createStoreRes = await request(app).post(`/api/franchise/${franchiseID}/store`).set('Authorization', `Bearer ${adminAuthToken}`).send(store);
+    expect(createStoreRes.status).toBe(200);
+    const storeID = createStoreRes.body.id;
+    
+    const deleteStoreRes = await request(app).delete(`/api/franchise/${franchiseID}/store/${storeID}`).set('Authorization', `Bearer ${adminAuthToken}`);
+    expect(deleteStoreRes.status).toBe(200);
+    expect(deleteStoreRes.body).toEqual({ message: 'store deleted' });
+});
 
 function randomName() {
     return Math.random().toString(36).substring(2, 8);
