@@ -30,7 +30,24 @@ beforeAll(async () => {
     const registerRes = await request(app).post('/api/auth').send(testUser);
     testUserAuthToken = registerRes.body.token;
     testUser.id = registerRes.body.user.id;
-
 });
+
+test('get the menu', async () => {
+    const menuRes = await request(app).get('/api/order/menu');
+    expect(menuRes.status).toBe(200);
+
+    expect(Array.isArray(menuRes.body)).toBe(true);
+    expect(menuRes.body.length).toBeGreaterThan(0);
+
+    const expectedFirstMenuItem = {
+        id: 1,
+        title: 'Veggie!',
+        image: 'pizza1.png',
+        price: 0.0038,
+        description: 'A garden of delight'
+    };
+    expect(menuRes.body[0]).toMatchObject(expectedFirstMenuItem);       
+});
+
 
 

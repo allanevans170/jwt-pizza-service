@@ -20,6 +20,7 @@ let adminUser;
 let adminUserId;
 let adminAuthToken;
 let testUserAuthToken;
+let testUserId;
 
 beforeAll(async () => {
     adminUser = await createAdminUser();
@@ -31,6 +32,9 @@ beforeAll(async () => {
     const testUser = { name: 'unauthorized', email: 'unAuth@test.com', password: 'a' };
     const testRegRes = await request(app).post('/api/auth').send(testUser);
     testUserAuthToken = testRegRes.body.token;
+    testUserId = testRegRes.body.user.id;
+
+
 });
 
 let testFranchise;
@@ -131,8 +135,19 @@ function randomName() {
     return Math.random().toString(36).substring(2, 8);
 }
 
-// afterAll(async () => {
-//   if (adminUser && adminUser.id) {
-//     await DB.deleteUser(adminUser.id);
-//   }
-// });
+afterEach(async () => {
+    if (createFranchiseRes && createFranchiseRes.body && createFranchiseRes.body.id) {
+        const franchiseID = createFranchiseRes.body.id;
+        await request(app).delete(`/api/franchise/${franchiseID}`).set('Authorization', `Bearer ${adminAuthToken}`);
+    }
+});
+
+afterAll(async () => { 
+    if (testUserId) {
+        await request(app).delete(`/api/auth/${testUserId}`).set('Authorization', `Bearer ${adminAuthToken}`); 
+    }
+
+    if (adminUser && adminUser.id) {
+        await request(app).delete(`/api/auth/${adminUserId}`).set('Authorization', `Bearer ${adminAuthToken}`);
+    }
+});
