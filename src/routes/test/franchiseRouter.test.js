@@ -1,11 +1,21 @@
 const request = require('supertest');
-const app = require('../service');
+const app = require('../../service.js');
+// const testHelper = require('./testHelper.js');
+
+const { Role, DB } = require('../../database/database.js');
+ 
 
 if (process.env.VSCODE_INSPECTOR_OPTIONS) {
   jest.setTimeout(60 * 1000 * 5); // 5 minutes
 }
 
-const { Role, DB } = require('../database/database.js');
+let adminUser;
+let adminUserId;
+let adminAuthToken;
+
+
+// might build this out to cut down on code duplication in tests
+
 
 async function createAdminUser() {
   let user = { password: 'toomanysecrets', roles: [{ role: Role.Admin }] };
@@ -15,10 +25,8 @@ async function createAdminUser() {
   user = await DB.addUser(user);
   return { ...user, password: 'toomanysecrets' };
 }
-    
-let adminUser;
-let adminUserId;
-let adminAuthToken;
+
+
 let testUserAuthToken;
 let testUserId;
 
@@ -33,7 +41,6 @@ beforeAll(async () => {
     const testRegRes = await request(app).post('/api/auth').send(testUser);
     testUserAuthToken = testRegRes.body.token;
     testUserId = testRegRes.body.user.id;
-
 
 });
 
@@ -135,7 +142,7 @@ function randomName() {
     return Math.random().toString(36).substring(2, 8);
 }
 
-afterEach(async () => {
+afterEach(async () => { // I'm still leaking one franchise somewhere??? not sure why it isn't cleaning up
     if (createFranchiseRes && createFranchiseRes.body && createFranchiseRes.body.id) {
         const franchiseID = createFranchiseRes.body.id;
         await request(app).delete(`/api/franchise/${franchiseID}`).set('Authorization', `Bearer ${adminAuthToken}`);
